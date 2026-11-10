@@ -228,6 +228,12 @@ QStringList QmlMobileAppProxy::skinsIn(const QUrl& skinsFolder) const {
     const QDir dir(path);
     const QStringList folders = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
     for (const QString& folder : folders) {
+#ifndef Q_OS_ANDROID
+        // Touch Edition is an Android-only interface; keep it out of desktop skin choices.
+        if (folder == QStringLiteral("TouchEdition")) {
+            continue;
+        }
+#endif
         if (folder != kClassicSkin &&
                 QFileInfo::exists(dir.filePath(folder + QStringLiteral("/MainWindow.qml")))) {
             skins.append(folder);
@@ -239,6 +245,7 @@ QStringList QmlMobileAppProxy::skinsIn(const QUrl& skinsFolder) const {
         const QStringList knownSkins{
                 QStringLiteral("Booth"),
                 QStringLiteral("Lite"),
+                QStringLiteral("TouchEdition"),
         };
         for (const QString& folder : knownSkins) {
             if (!skins.contains(folder) &&
