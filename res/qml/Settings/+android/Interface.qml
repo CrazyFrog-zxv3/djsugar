@@ -337,7 +337,7 @@ Category {
                                 Skin.ComboBox {
                                     id: skinInput
 
-                                    readonly property var skins: Mixxx.MobileApp.skinsIn(Qt.resolvedUrl("../../Skins/"))
+                                    readonly property var skins: Mixxx.MobileApp.skinsIn(Qt.resolvedUrl("../Skins/"))
 
                                     Layout.preferredWidth: 180
                                     model: skins.map(skin => skin === "Classic" ? qsTr("Classic") : skin)
