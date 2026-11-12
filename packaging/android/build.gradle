@@ -34,7 +34,7 @@ android {
      * - androidBuildToolsVersion,
      * - androidCompileSdkVersion
      * - qtAndroidDir - holds the path to qt android files
-     *                   needed to build any Qt application
+     *                   needed for any Qt application
      *                   on Android.
      * - qtGradlePluginType - whether to build an app or a library
      *
@@ -90,6 +90,8 @@ android {
     }
 
     defaultConfig {
+        // Diagnostic build installs side-by-side and cannot replace the user's app.
+        applicationIdSuffix ".startupdiag"
         resConfig "en"
         minSdkVersion qtMinSdkVersion
         targetSdkVersion qtTargetSdkVersion
