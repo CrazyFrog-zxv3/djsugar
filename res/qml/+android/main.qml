@@ -14,6 +14,16 @@ ApplicationWindow {
     readonly property var skinItem: content.item
     readonly property int designWidth: 1792
     readonly property int designHeight: 1008
+    property bool startupFirstFrameLogged: false
+
+    onFrameSwapped: {
+        if (!root.startupFirstFrameLogged) {
+            root.startupFirstFrameLogged = true;
+            console.info("[DJ Sugar StartupDiag] first frame swapped; Core.ready=", Mixxx.Core.ready,
+                         "skin=", Mixxx.MobileApp.skin, "Loader.status=", content.status,
+                         "Loader.active=", content.active);
+        }
+    }
 
     // Mobile: the window covers the whole display, camera cutout included.
     // Qt would pad the content by the safe area; the skins draw edge to edge
@@ -101,9 +111,15 @@ ApplicationWindow {
     }
     function loadSkin() {
         if (!Mixxx.Core.ready) {
+            console.info("[DJ Sugar StartupDiag] loadSkin deferred; Core.ready=false");
             return;
         }
-        content.setSource(root.skinSource(Mixxx.MobileApp.skin), {
+        const selectedSkin = Mixxx.MobileApp.skin;
+        const selectedSource = root.skinSource(selectedSkin);
+        console.info("[DJ Sugar StartupDiag] loadSkin requested; skin=", selectedSkin,
+                     "source=", selectedSource, "Loader.status=", content.status,
+                     "Loader.active=", content.active);
+        content.setSource(selectedSource, {
             "applicationWindow": root
         });
     }
@@ -111,6 +127,9 @@ ApplicationWindow {
     Connections {
         target: Mixxx.Core
         function onReadyChanged() {
+            console.info("[DJ Sugar StartupDiag] Core.ready changed:", Mixxx.Core.ready,
+                         "skin=", Mixxx.MobileApp.skin, "Loader.status=", content.status,
+                         "Loader.active=", content.active);
             root.updateVisibility();
             root.loadSkin();
         }
@@ -122,6 +141,8 @@ ApplicationWindow {
     Connections {
         target: Mixxx.MobileApp
         function onSkinChanged() {
+            console.info("[DJ Sugar StartupDiag] skin changed:", Mixxx.MobileApp.skin,
+                         "Loader.status=", content.status, "Loader.active=", content.active);
             content.source = "";
             skinSwitchTimer.restart();
         }
@@ -134,6 +155,9 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
+        console.info("[DJ Sugar StartupDiag] Android root completed; Core.ready=", Mixxx.Core.ready,
+                     "skin=", Mixxx.MobileApp.skin, "Loader.status=", content.status,
+                     "Loader.active=", content.active, "window=", root.width, "x", root.height);
         root.updateVisibility();
         root.loadSkin();
     }
@@ -143,8 +167,15 @@ ApplicationWindow {
         interval: 45
         repeat: false
         running: Mixxx.Core.ready && !content.active
+        onRunningChanged: {
+            console.info("[DJ Sugar StartupDiag] activateContentTimer running=", running,
+                         "Core.ready=", Mixxx.Core.ready, "Loader.active=", content.active);
+        }
         onTriggered: {
+            console.info("[DJ Sugar StartupDiag] activateContentTimer fired; Loader.status=", content.status,
+                         "source=", content.source);
             content.active = true;
+            console.info("[DJ Sugar StartupDiag] Loader.active set true; status=", content.status);
         }
     }
 
@@ -155,7 +186,17 @@ ApplicationWindow {
 
         active: false
         asynchronous: false
+        onActiveChanged: {
+            console.info("[DJ Sugar StartupDiag] Loader.active changed:", active,
+                         "status=", status, "source=", source);
+        }
+        onSourceChanged: {
+            console.info("[DJ Sugar StartupDiag] Loader.source changed:", source,
+                         "active=", active, "status=", status);
+        }
         onStatusChanged: {
+            console.info("[DJ Sugar StartupDiag] Loader.status changed:", status,
+                         "active=", active, "source=", source, "itemPresent=", item !== null);
             if (status === Loader.Ready) {
                 root.applySkinTheme(item.skinTheme);
                 splash.progress = 1.0;
@@ -169,7 +210,8 @@ ApplicationWindow {
                     Mixxx.MobileApp.skin = "Classic";
                     return;
                 }
-                console.error("Failed to load the Mixxx main window")
+                console.error("[DJ Sugar StartupDiag] Failed to load the Mixxx main window; source=", source,
+                              "skin=", Mixxx.MobileApp.skin);
                 root.quit()
             }
         }
@@ -296,6 +338,8 @@ ApplicationWindow {
             interval: 40
             repeat: false
             onTriggered: {
+                console.info("[DJ Sugar StartupDiag] splash dismiss timer fired; Loader.status=", content.status,
+                             "itemPresent=", content.item !== null);
                 splash.fadingOut = true;
             }
         }
