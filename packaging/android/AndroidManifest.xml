@@ -55,7 +55,7 @@
         android:hardwareAccelerated="true"
         android:largeHeap="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="DJ Sugar"
+        android:label="DJ Sugar Diagnóstico"
         android:theme="@style/MixxxFullScreenTheme"
         android:requestLegacyExternalStorage="true"
         android:allowBackup="true"
